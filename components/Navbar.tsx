@@ -8,12 +8,17 @@ import { Menu } from 'lucide-react';
 interface ItemMenu {
   nome: string;
   rota: string;
+  submenu?: Array<{ nome: string; rota: string }>;
 }
 
 const itens: ItemMenu[] = [
   { nome: 'home', rota: '/' },
   { nome: 'projetos', rota: '/projetos' },
-  { nome: 'sobre', rota: '/sobre' },
+  {
+    nome: 'sobre',
+    rota: '/sobre',
+    submenu: [{ nome: 'Política de Privacidade', rota: '/politica-de-privacidade' }],
+  },
   { nome: 'contato', rota: '/contato' },
 ];
 
@@ -33,18 +38,43 @@ export default function Navbar() {
           </Link>
 
           {/* Menu Desktop */}
-          <div className="hidden md:flex gap-8">
-            {itens.map((item) => (
-              <Link
-                key={item.rota}
-                href={item.rota}
-                className={`capitalize transition-all duration-300 hover:text-cyan-400 ${
-                  pathname === item.rota ? 'text-cyan-400 font-semibold' : 'text-gray-300'
-                }`}
-              >
-                {item.nome}
-              </Link>
-            ))}
+          <div className="hidden md:flex flex-1 justify-center gap-8 items-center">
+            {itens.map((item) => {
+              const isActive =
+                pathname === item.rota ||
+                item.submenu?.some((sub) => sub.rota === pathname);
+
+              return (
+                <div key={item.rota} className={`relative ${item.submenu ? 'group' : ''}`}>
+                  <Link
+                    href={item.rota}
+                    className={`capitalize transition-all duration-300 hover:text-cyan-400 ${
+                      isActive ? 'text-cyan-400 font-semibold' : 'text-gray-300'
+                    }`}
+                  >
+                    {item.nome}
+                  </Link>
+
+                  {item.submenu && (
+                    <div className="invisible opacity-0 group-hover:visible group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-all duration-200 absolute top-full left-0 min-w-[280px] rounded-xl bg-slate-900 border border-slate-700 shadow-xl shadow-black/20 z-40">
+                      {item.submenu.map((sub) => (
+                        <Link
+                          key={sub.rota}
+                          href={sub.rota}
+                          className={`block px-4 py-3 text-sm text-center whitespace-normal transition-colors ${
+                            pathname === sub.rota
+                              ? 'text-cyan-400'
+                              : 'text-gray-300 hover:text-cyan-300'
+                          }`}
+                        >
+                          {sub.nome}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
           {/* Botão Menu Mobile */}
@@ -67,18 +97,37 @@ export default function Navbar() {
         {menuAberto && (
           <div className="md:hidden mt-4 pb-4 space-y-3">
             {itens.map((item) => (
-              <Link
-                key={item.rota}
-                href={item.rota}
-                onClick={() => setMenuAberto(false)}
-                className={`block w-full text-left capitalize py-2 px-4 rounded transition-all ${
-                  pathname === item.rota
-                    ? 'bg-cyan-500/20 text-cyan-400'
-                    : 'text-gray-300 hover:bg-slate-800'
-                }`}
-              >
-                {item.nome}
-              </Link>
+              <div key={item.rota}>
+                <Link
+                  href={item.rota}
+                  onClick={() => setMenuAberto(false)}
+                  className={`block w-full text-left capitalize py-2 px-4 rounded transition-all ${
+                    pathname === item.rota
+                      ? 'bg-cyan-500/20 text-cyan-400'
+                      : 'text-gray-300 hover:bg-slate-800'
+                  }`}
+                >
+                  {item.nome}
+                </Link>
+                {item.submenu && (
+                  <div className="ml-4 mt-2 space-y-2">
+                    {item.submenu.map((sub) => (
+                      <Link
+                        key={sub.rota}
+                        href={sub.rota}
+                        onClick={() => setMenuAberto(false)}
+                        className={`block w-full text-left rounded-lg px-4 py-2 text-sm transition-all ${
+                          pathname === sub.rota
+                            ? 'bg-cyan-500/20 text-cyan-400'
+                            : 'text-gray-300 hover:bg-slate-800'
+                        }`}
+                      >
+                        {sub.nome}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         )}
